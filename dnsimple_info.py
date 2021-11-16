@@ -1,3 +1,8 @@
+#!/usr/bin/python3
+#  Copyright: Ansible Project
+#
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 from __future__ import (absolute_import, division, print_function)
 from ansible.module_utils.basic import AnsibleModule
 from requests import Request, Session
@@ -134,7 +139,6 @@ def main():
 
     # If we have the account only and domain, return records for the domain
     elif params['name'] and params['account_id'] and params['api_key']:
-        #result['dnsimple_info'] = { "test": "success" }
         result['dnsimple_info'] = domain_info(params['account_id'],
                                               params['api_key'],
                                               params['name'], req)
