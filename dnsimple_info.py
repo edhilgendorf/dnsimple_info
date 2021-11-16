@@ -1,8 +1,63 @@
 from __future__ import (absolute_import, division, print_function)
 from ansible.module_utils.basic import AnsibleModule
 from requests import Request, Session
-import requests
 __metaclass__ = type
+
+DOCUMENTATION = r'''
+---
+module: dnsimple_info
+
+short_description: Pull basic info from DNSimple API
+
+version_added: "1.0.0"
+
+description: This is my longer description explaining my test info module.
+
+options:
+    name:
+        description: The domain name to retrieve info from, will return all associated records
+        required: false
+        type: str
+
+    account_id:
+        description: The account ID to query
+        required: true
+        type: str
+
+    api_key:
+        description: The API key to use
+        required: true
+        type: str
+
+    record:
+        description: The record to find
+        required: false
+        type: str
+
+author:
+    - Your Name (@yourGitHubHandle)
+'''
+
+EXAMPLES = r'''
+- name: Get all domains from an account
+  dnsimple_info:
+    account_id: "1234"
+    api_key: "1234"
+
+- name: Get all records from a domain
+  dnsimple_info:
+    name: "example.com"
+    account_id: "1234"
+    api_key: "1234"
+
+- name: Get all info from a matching record
+  dnsimple_info:
+    name: "example.com"
+    record: "subdomain"
+    account_id: "1234"
+    api_key: "1234"
+'''
+
 
 def build_url(account, key, is_sandbox):
     headers={'Accept': 'application/json',
@@ -11,6 +66,7 @@ def build_url(account, key, is_sandbox):
     req = Request(url=url, headers=headers)
     prepped_request = req.prepare()
     return prepped_request
+
 
 def iterate_data(request_object):
     data = []
@@ -27,18 +83,22 @@ def iterate_data(request_object):
     else:
         return response.json()
 
+
 def record_info(account, key, domain, record, req_obj):
     req_obj.url, req_obj.method = req_obj.url + '/zones/' + domain + '/records?name=' + record, 'GET'
     return iterate_data(req_obj)
+
 
 def domain_info(account, key, domain, req_obj):
     req_obj.url, req_obj.method = req_obj.url + '/zones/' + domain + '/records?per_page=1', 'GET'
     resp = Session().send(req_obj)
     return iterate_data(req_obj)
 
+
 def account_info(account, key, req_obj):
     req_obj.url, req_obj.method = req_obj.url + '/zones/?per_page=1', 'GET'
     return iterate_data(req_obj)
+
 
 def main():
     # define available arguments/parameters a user can pass to the module
@@ -64,7 +124,7 @@ def main():
                     params['api_key'],
                     params['sandbox'])
 
-    #If we have a record return info on that record
+    # If we have a record return info on that record
     if params['name'] and params['account_id'] and params['api_key'] and params['record']:
         result['dnsimple_info'] = record_info(params['account_id'],
                                               params['api_key'],
@@ -72,19 +132,20 @@ def main():
                                               params['record'],
                                               req)
 
-    #If we have the account only and domain, return records for the domain
+    # If we have the account only and domain, return records for the domain
     elif params['name'] and params['account_id'] and params['api_key']:
         #result['dnsimple_info'] = { "test": "success" }
         result['dnsimple_info'] = domain_info(params['account_id'],
                                               params['api_key'],
                                               params['name'], req)
 
-    #If we have the account only, return domains
+    # If we have the account only, return domains
     elif params['account_id'] and params['api_key']:
         result['dnsimple_info'] = account_info(params['account_id'],
                                                params['api_key'], req)
 
     module.exit_json(**result)
+
 
 if __name__ == '__main__':
     main()
