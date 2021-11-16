@@ -15,7 +15,6 @@ def build_url(account, key, is_sandbox):
 def iterate_data(request_object):
     data = []
     response = Session().send(request_object)
-    return response.json()
     if response.json()["pagination"]["total_pages"]:
         pages = response.json()["pagination"]["total_pages"]
         for p in range(pages):
@@ -79,6 +78,7 @@ def main():
         result['dnsimple_info'] = domain_info(params['account_id'],
                                               params['api_key'],
                                               params['name'], req)
+
     #If we have the account only, return domains
     elif params['account_id'] and params['api_key']:
         result['dnsimple_info'] = account_info(params['account_id'],
