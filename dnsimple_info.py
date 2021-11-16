@@ -7,12 +7,7 @@ __metaclass__ = type
 def build_url(account, key, is_sandbox):
     headers={'Accept': 'application/json',
              'Authorization': 'Bearer ' + key }
-    pre_url = ""
-    if is_sandbox == True:
-        pre_url = 'https://api.sandbox.dnsimple.com/v2/'
-    else:
-        pre_url = 'https://api.dnsimple.com/v2/'
-    url = pre_url + account
+    url = 'https://api{sandbox}.dnsimple.com/'.format(sandbox=".sandbox" if is_sandbox else "") + 'v2/' + account
     req = Request(url=url, headers=headers)
     prepped_request = req.prepare()
     return prepped_request
